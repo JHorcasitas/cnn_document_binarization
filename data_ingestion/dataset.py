@@ -20,18 +20,11 @@ class BinaryDataset(Dataset):
         cfg = config.read_config()
 
         self._kind = kind
-        self._validate_kind()
-
         self._radius     = cfg['radius']
         self._data_path  = cfg['data_path']
         self._transform  = transform
         
         self._img_sizes = self._get_img_sizes()
-
-    def _validate_kind(self):
-        allowed_values = {'train', 'test', 'val'}
-        if self._kind not in allowed_values:
-            raise ValueError(f'Kind Value: \'{self._kind}\' not supported')
     
     def _get_img_sizes(self):
         img_sizes = OrderedDict()
