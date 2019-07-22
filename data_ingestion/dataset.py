@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from torch.utils.data import Dataset
 
-import config
+from cnn_document_binarization import config
 
 
 class BinaryDataset(Dataset):
@@ -53,13 +53,14 @@ class BinaryDataset(Dataset):
             raise RuntimeError(f'Index {idx} could not be found')
         
         def get_coord_from_idx(input_img, img_idx):
+            #print(f'Index: {img_index}', end=' ')
             h, w = input_img.shape
-            row = img_idx // w
-            col = (img_idx % w) -1
+            row = (img_idx - 1) // w
+            col = (img_idx - 1) % w
             return col, row
 
         img_name, img_index = idx_to_img_name(idx)
-        print(f'Image name: {img_name}')
+        #print(f'Image name: {img_name}')
         input_path = os.path.join(self._data_path,
                                   'input',
                                   self._kind,
@@ -73,7 +74,7 @@ class BinaryDataset(Dataset):
         target_img = cv2.imread(target_path, 0)
         target_img = np.where(target_img > 0, 1, 0)
         x, y = get_coord_from_idx(input_img, img_index)
-        print(f'x: {x}, y: {y}')
+        #print(f'x: {x}, y: {y}')
 
         input_img = np.pad(array=input_img,
                            pad_width=self._radius,
