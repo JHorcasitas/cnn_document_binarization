@@ -1,6 +1,6 @@
 import os
 import configparser
-from constants import CONFIG_PATH
+from cnn_document_binarization.constants import CONFIG_PATH
 
 
 def read_config():
