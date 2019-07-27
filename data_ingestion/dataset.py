@@ -19,13 +19,27 @@ class BinaryDataset(Dataset):
         """
         cfg = config.read_config()
 
-        self._kind = kind
+        self._kind       = kind
         self._radius     = cfg['radius']
         self._data_path  = cfg['data_path']
         self._transform  = transform
         
+        # Loads all images in memory as a dict of img_name:img_array pairs
+        input_path  = os.path.join(self._data_path, 'input', self._kind)
+        target_path = os.path.join(self._data_path, 'target', self._kind)
+        self._input_imgs  = self._load_images(input_path)
+        self._target_imgs = self._load_images(target_path)
+
         self._img_sizes = self._get_img_sizes()
     
+    def _load_images(self, path):
+        img_dict = {}
+        order = lambda x: int(os.path.splitext(x)[0])
+        for img_name in sorted(os.listdir(path), key=order):
+            img_path = os.path.join(path, img_name)
+            img_dict[img_name] = cv2.imread(img_path, 0)
+        return img_dict
+
     def _get_img_sizes(self):
         img_sizes = OrderedDict()
         path = os.path.join(self._data_path, 'input', self._kind)
@@ -59,17 +73,10 @@ class BinaryDataset(Dataset):
             return col, row
 
         img_name, img_index = idx_to_img_name(idx)
-        input_path = os.path.join(self._data_path,
-                                  'input',
-                                  self._kind,
-                                  img_name)
-        target_path = os.path.join(self._data_path,
-                                   'target',
-                                   self._kind,
-                                   img_name)
 
-        input_img  = cv2.imread(input_path, 0)
-        target_img = cv2.imread(target_path, 0)
+        input_img  = self._input_imgs[img_name] 
+        target_img = self._target_imgs[img_name]
+
         target_img = np.where(target_img > 0, 1, 0)
         x, y = get_coord_from_idx(input_img, img_index)
 
