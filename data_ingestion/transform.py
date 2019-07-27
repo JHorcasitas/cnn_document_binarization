@@ -11,7 +11,7 @@ class Normalize:
         self._mean = mean
 
     def __call__(self, sample):
-        img = sample['image']
+        img = sample['image'] / 255
         img = (img - self._mean) / self._std
         sample['image'] = img
         return sample
