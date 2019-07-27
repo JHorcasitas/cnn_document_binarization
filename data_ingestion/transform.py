@@ -23,6 +23,8 @@ class Tensorization:
     def __call__(self, sample):
         img = sample['image']
         img = img[None, ...]
-        sample['image']  = torch.from_numpy(img)
-        sample['target'] = torch.tensor(sample['target'])
+        sample['image']  = torch.from_numpy(img).float()
+
+        target = torch.tensor(sample['target'])
+        sample['target'] = target.unsqueeze(0)
         return sample
