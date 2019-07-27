@@ -83,7 +83,7 @@ class BinaryDataset(Dataset):
         top    = y
         bottom = y + (2 * self._radius) + 1
         input_roi    = input_img[top:bottom, left:right]
-        target_value = target_img[y, x]
+        target_value = target_img[y, x].astype(np.float32)
 
         sample = {'image':input_roi, 'target':target_value}
 
