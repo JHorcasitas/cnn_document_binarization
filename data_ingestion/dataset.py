@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from torch.utils.data import Dataset
 
-from cnn_document_binarization import config
+import config
 
 
 class BinaryDataset(Dataset):
