@@ -16,7 +16,7 @@ class Normalize:
         sample['image'] = img
         return sample
 
-class Tensorization:
+class Tensorize:
     """
     Convert to PyTorch Tensor and adds dummy dimension
     """
