@@ -1,9 +1,6 @@
 import os
-from collections import OrderedDict
 
-import cv2
-import numpy as np
-import pandas as pd
+from PIL import Image
 from torch.utils.data import Dataset
 
 import config
@@ -11,90 +8,45 @@ import config
 
 class BinaryDataset(Dataset):
 
-    def __init__(self, kind, transform=None):
+    def __init__(self, kind, input_transform=None, target_transform=None):
         """
         args:
         kind (str): one of: {train, test, val}
         transform (): transformation to apply to every image
         """
-        cfg = config.read_config()
+        self._kind = kind
+        self._input_transform  = input_transform
+        self._target_transform = target_transform
 
-        self._kind       = kind
+        cfg = config.read_config()
         self._radius     = cfg['radius']
         self._data_path  = cfg['data_path']
-        self._transform  = transform
-        
-        # Loads all images in memory as a dict of img_name:img_array pairs
-        input_path  = os.path.join(self._data_path, 'input', self._kind)
-        target_path = os.path.join(self._data_path, 'target', self._kind)
-        self._input_imgs  = self._load_images(input_path)
-        self._target_imgs = self._load_images(target_path)
 
-        self._img_sizes = self._get_img_sizes()
-    
-    def _load_images(self, path):
-        img_dict = {}
-        order = lambda x: int(os.path.splitext(x)[0])
-        for img_name in sorted(os.listdir(path), key=order):
-            img_path = os.path.join(path, img_name)
-            img_dict[img_name] = cv2.imread(img_path, 0)
-        return img_dict
+        self._input_path  = os.path.join(self._data_path, 'input', self._kind)
+        self._target_path = os.path.join(self._data_path, 'target', self._kind)
 
-    def _get_img_sizes(self):
-        img_sizes = OrderedDict()
-        path = os.path.join(self._data_path, 'input', self._kind)
         order = lambda x: int(os.path.splitext(x)[0])
-        for img_name in sorted(os.listdir(path), key=order):
-            img_path = os.path.join(path, img_name)
-            img = cv2.imread(img_path, 0)
-            img_sizes[img_name] = img.shape[0] * img.shape[1]
-        return img_sizes
+        self._input_names  = sorted(os.listdir(self._input_path), key=order)
+        self._target_names = sorted(os.listdir(self._target_path), key=order)
+
+        if len(self._input_names) != len(self._target_names):
+            msg = (f'Inconsisten number of files between: {self._input_path} '
+                   f'and {self._target_path}')
+            raise AssertionError(msg)
 
     def __len__(self):
-        num_patterns = 0
-        for key in self._img_sizes:
-            num_patterns += self._img_sizes[key]
-        return num_patterns
+        return len(self._input_names)
     
     def __getitem__(self, idx):
+        input_path = os.path.join(self._input_path, self._input_names[idx])
+        input = Image.open(input_path).convert('RGB')
 
-        def idx_to_img_name(idx):
-            total = 0
-            for key in self._img_sizes:
-                total += self._img_sizes[key]
-                if idx < total:
-                    return key, idx - (total - self._img_sizes[key]) + 1
-            raise RuntimeError(f'Index {idx} could not be found')
-        
-        def get_coord_from_idx(input_img, img_idx):
-            h, w = input_img.shape
-            row = (img_idx - 1) // w
-            col = (img_idx - 1) % w
-            return col, row
+        target_path = os.path.join(self._target_path, self._target_names[idx])
+        target = Image.open(target_path).convert('1')
 
-        img_name, img_index = idx_to_img_name(idx)
+        if self._input_transform:
+            input = self._input_transform(input)
+        if self._target_transform:
+            target = self._target_transform(target)
 
-        input_img  = self._input_imgs[img_name] 
-        target_img = self._target_imgs[img_name]
-
-        target_img = np.where(target_img > 0, 1, 0)
-        x, y = get_coord_from_idx(input_img, img_index)
-
-        input_img = np.pad(array=input_img,
-                           pad_width=self._radius,
-                           mode='constant',
-                           constant_values=255)
- 
-        left   = x
-        right  = x + (2 * self._radius) + 1
-        top    = y
-        bottom = y + (2 * self._radius) + 1
-        input_roi    = input_img[top:bottom, left:right]
-        target_value = target_img[y, x].astype(np.float32)
-
-        sample = {'image':input_roi, 'target':target_value}
-
-        if self._transform:
-            sample = self._transform(sample)
-
-        return sample
+        return input, target
