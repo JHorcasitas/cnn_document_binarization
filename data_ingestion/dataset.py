@@ -39,7 +39,7 @@ class BinaryDataset(Dataset):
     
     def __getitem__(self, idx):
         input_path = os.path.join(self._input_path, self._input_names[idx])
-        input = Image.open(input_path).convert('RGB')
+        input = Image.open(input_path).convert('L')
 
         target_path = os.path.join(self._target_path, self._target_names[idx])
         target = Image.open(target_path).convert('1')
