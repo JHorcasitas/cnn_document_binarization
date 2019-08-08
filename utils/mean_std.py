@@ -1,12 +1,12 @@
 """
-Computes the mean and std for the training data
-Run with the -m flag
+Computes and prints to file the mean and std of the training data
 """
 import os
 import cv2
 from statistics import mean
-from cnn_document_binarization import config
-from cnn_document_binarization.constants import UTILS_PATH
+
+import config
+from definitions import UTILS_PATH
 
 
 def main():
