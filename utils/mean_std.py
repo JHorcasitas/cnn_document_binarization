@@ -1,24 +1,27 @@
-"""
-Computes and prints to file the mean and std of the training data
-"""
 import os
-import cv2
 from statistics import mean
 
-import config
+from torchvision import transforms
+from torchvision.transforms import Compose
+
+import data_ingestion
 from definitions import UTILS_PATH
 
 
 def main():
-    cfg = config.read_config()
-    data_path = cfg['data_path']
-    data_train_path = os.path.join(data_path, 'input', 'train')
+    """
+    Computes and writes the mean and std of the training data
+    """
+    # Load Datasets
+    input_transform  = Compose([transforms.ToTensor()])
+    dataset_factory = data_ingestion.DatasetFactory()
+    dataset = dataset_factory.get_dataset(kind='train',
+                                          input_transform=input_transform)
 
     data_mean, data_std = [], []
-    for file in os.scandir(data_train_path):
-        img = cv2.imread(file.path, 0) / 255
-        data_mean.append(img.mean())
-        data_std.append(img.std())
+    for input, _ in dataset:
+        data_mean.append(input.mean().item())
+        data_std.append(input.std().item())
 
     write_file = os.path.join(UTILS_PATH, 'std_mean.txt')
     with open(write_file, 'w') as f:
