@@ -77,18 +77,18 @@ class BinaryDataset(Dataset):
 
         img_name, img_index = get_img_info(idx)
         input_img  = self._input_imgs[img_name] 
-        input_img = ImageOps.expand(input_img, border=self._radius, fill=255)
         target_img = self._target_imgs[img_name]
         
         x, y = get_coord_from_idx(input_img, img_index)
-
+        input_img = ImageOps.expand(input_img, border=self._radius, fill=255)
+        
         # Get input
         right  = x + (2 * self._radius) + 1
         bottom = y + (2 * self._radius) + 1
         input = input_img.crop((x, y, right, bottom))
 
         # Get target
-        target = target_img.getpixel((x, y))
+        target = target_img.getpixel((x, y))              
         target = 1 if target > 0 else 0
         target = np.array(target, dtype=np.float32).reshape(1)
 
