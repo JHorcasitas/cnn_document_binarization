@@ -1,6 +1,6 @@
 import os
 import configparser
-from constants import CONFIG_PATH
+from definitions import CONFIG_PATH
 
 
 def read_config():
