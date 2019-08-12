@@ -1,11 +1,13 @@
 import os
 import torch
+import models
 from definitions import MODELS_PATH
-from .models.sk_network import StridedNet
 
 
-def get_model(cache=False):
-    model = StridedNet()
-    if cache:
-        pass
-    return model
+def get_model(kind, cache=False):
+    if kind == 'sw':
+        return models.SlideNet()
+    elif kind == 'sk':
+        return models.StridedNet()
+    else:
+        raise ValueError(f'Invalid kind value: \'kind\'')
