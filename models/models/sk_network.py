@@ -21,6 +21,7 @@ class StridedNet(nn.Module):
                                stride=1,
                                dilation=1) 
         self.pool1 = nn.MaxPool2d(kernel_size=2, stride=1, dilation=1)
+
         self.conv2 = nn.Conv2d(in_channels=10,
                                out_channels=20,
                                kernel_size=4,
@@ -33,21 +34,23 @@ class StridedNet(nn.Module):
                              kernel_size=2,
                              stride=1,
                              dilation=4)
+
         self.fc2 = nn.Conv2d(in_channels=32,
                              out_channels=16,
                              kernel_size=1,
                              stride=1,
                              dilation=1)
+        
         self.fc3 = nn.Conv2d(in_channels=16,
                              out_channels=1,
                              kernel_size=1,
                              stride=1,
                              dilation=1)
-    
+
     def forward(self, x):
-        out = F.relu(self.pool1(self.conv1(x)))
-        out = F.relu(self.pool2(self.conv2(out)))
-        out = F.relu(self.fc1(out))
-        out = F.relu(self.fc2(out))
+        out = F.gelu(self.pool1(self.conv1(x)))
+        out = F.gelu(self.pool2(self.conv2(out)))
+        out = F.gelu(self.fc1(out))
+        out = F.gelu(self.fc2(out))
         out = self.fc3(out)
         return out
