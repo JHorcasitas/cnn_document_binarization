@@ -20,9 +20,9 @@ class SlideNet(nn.Module):
         self.fc3   = nn.Linear(in_features=16, out_features=1)
 
     def forward(self, x):
-        out = F.relu(self.pool1(self.conv1(x)))
-        out = F.relu(self.pool2(self.conv2(out)))
+        out = F.gelu(self.pool1(self.conv1(x)))
+        out = F.gelu(self.pool2(self.conv2(out)))
         out = out.view(-1, 80)
-        out = F.relu(self.fc1(out))
-        out = F.relu(self.fc2(out))
+        out = F.gelu(self.fc1(out))
+        out = F.gelu(self.fc2(out))
         return self.fc3(out)
