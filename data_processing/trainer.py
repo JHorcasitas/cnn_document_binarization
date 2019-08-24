@@ -1,30 +1,33 @@
-import torch.optim as optim
 import torch.nn.functional as F
 
 
 class Trainer:
-
+    """
+    """
     def __init__(self,
                  dataloader,
                  model,
                  device,
-                 tensorboard,
-                 epoch,
-                 num_batches=1000):
+                 optimizer,
+                 tb=None,
+                 num_batches=500):
+        """
+        """ 
+        self._dataloader = dataloader
+        self._model      = model.to(device)
+        self._device     = device
+        self._optim      = optimizer
         
-        self._epoch = epoch
-        
-        self._tb          = tensorboard 
-        self._model       = model
-        self._device      = device
-        self._dataloader  = dataloader
+        self._tb = tb
         self._num_batches = num_batches
-
-        self._model     = self._model.to(self._device).train()
-        self._optimizer = optim.Adam(self._model.parameters())
-
+        
+        self._epoch = 0
 
     def train(self):
+        """
+        """
+        self._model.train()
+        
         avg_loss = 0
         for batch, (input, target) in enumerate(self._dataloader):
 
@@ -34,7 +37,7 @@ class Trainer:
             input  = input.to(self._device)
             target = target.to(self._device)
             
-            self._optimizer.zero_grad()
+            self._optim.zero_grad()
             output = self._model(input)
             loss = F.binary_cross_entropy_with_logits(output,
                                                       target,
@@ -45,4 +48,6 @@ class Trainer:
                                 batch + (self._epoch * self._num_batches))
             
             loss.backward()
-            self._optimizer.step()
+            self._optim.step()
+        
+        self._epoch += 1

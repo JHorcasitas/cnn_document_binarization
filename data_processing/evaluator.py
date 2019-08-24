@@ -3,37 +3,34 @@ from statistics import mean
 
 
 class Evaluator:
+    """
+    """
     def __init__(self,
                  dataloader,
                  model,
                  device,
-                 tensorboard,
-                 epoch,
-                 num_batches=1000,
-                 specifity=True,
-                 NPV=True):
-        
-        self._epoch = epoch
-
-        self._NPV = NPV
-        self._specifity = specifity
-
-        self._num_batches = num_batches
-        self._model = model
+                 tb,
+                 num_batches=500):
+        """
+        """
         self._dataloader = dataloader
         self._device = device
-        self._tb = tensorboard
+        self._model  = model.to(device)
 
-        self._model = self._model.to(self._device).eval()
+        self._tb = tb
+        self._num_batches = num_batches
 
+        self._epoch = 0
 
     def evaluate(self):
+        """
+        """
+        self._model.eval()
 
-        NPV_list = []
-        specifity_list = []
+        precision_list = []
+        recall_list = []
         for batch, (input, target) in enumerate(self._dataloader):
             
-
             if batch == self._num_batches:
                 break
 
@@ -45,29 +42,32 @@ class Evaluator:
                 output = torch.sigmoid(output)
                 output = torch.round(output)
 
-            if self._NPV:
-                NPV_list.append(self._compute_NPV(output, target))
-
-            if self._specifity:
-                specifity = self._compute_specifity(output, target)
-                specifity_list.append(specifity)
-
-        self._tb.add_scalar('NPV',
-                            mean(NPV_list),
+            precision_list.append(self._compute_precision(output, target))
+            recall_list.append(self._compute_recall(output, target))
+        
+        precision = mean(precision_list)
+        self._tb.add_scalar('Precision',
+                            precision,
                             self._epoch)
-        self._tb.add_scalar('Specifity',
-                            mean(specifity_list),
+        recall = mean(recall_list)
+        self._tb.add_scalar('Recall',
+                            recall,
                             self._epoch)
-    
-    def _compute_NPV(self, output, target):
+        f1 = 2 * ((precision * recall) / (precision + recall))
+        self._tb.add_scalar('F1 Score',
+                            f1,
+                            self._epoch)
+        
+        self._epoch += 1
+
+    def _compute_precision(self, output, target):
         output = output.view(-1)
         target = target.view(-1)
         true_negative  = ((output == 0) & (target == 0)).sum().item()
         false_negative = ((output == 0) & (target == 1)).sum().item()
         return true_negative / (true_negative + false_negative) 
 
-    
-    def _compute_specifity(self, output, target):
+    def _compute_recall(self, output, target):
         output = output.view(-1)
         target = target.view(-1)
         true_negative  = ((output == 0) & (target == 0)).sum().item()
