@@ -104,3 +104,6 @@ venv.bak/
 .mypy_cache/
 utils/std_mean.txt
 TO DO.txt
+
+# VSCode
+.vscode
