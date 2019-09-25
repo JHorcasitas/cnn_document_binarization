@@ -6,7 +6,14 @@ def get_dataset(dataset,
                 kind,
                 input_transform=None,
                 target_transform=None):
-    
+    """
+    Retrieves especified dataset
+    Args:
+        dataset (str): either ´binary´ or ´strided´
+        kind (str): one of {train, test, val}
+        input_transform (callable): transformation to apply on input
+        target_transform (callable): transformation to apply on target
+    """
     if kind not in {'train', 'test', 'val'}:
         raise ValueError(f'Kind value: \'{kind}\' not supported')
 
