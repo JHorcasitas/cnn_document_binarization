@@ -15,7 +15,7 @@ class Evaluator:
         """
         self._dataloader = dataloader
         self._device = device
-        self._model  = model.to(device)
+        self._model = model.to(device)
 
         self._tb = tb
         self._num_batches = num_batches
