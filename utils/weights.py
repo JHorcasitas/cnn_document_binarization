@@ -1,20 +1,20 @@
 import os
-import config
+import configparser
 from collections import Counter
 
-import cv2
 import numpy as np
 from PIL import Image
 
-from definitions import MODELS_PATH
+
+config = configparser.ConfigParser()
+config.read('config.ini')
 
 
 def get_weights(kind):
     """
     Returns the weights used in WeightedRandomSampler
     """
-    cfg = config.read_config()
-    data_path = cfg['data_path']
+    data_path = config['data_ingestion']['data_path']
     input_path = os.path.join(data_path, 'target', kind)
 
     distribution = []
