@@ -3,12 +3,15 @@ import configparser
 import torch
 import numpy as np
 from tqdm import tqdm
-from PIL import Image, ImageOps
+from PIL import ImageOps
 from torchvision import transforms
 from torchvision.transforms import Compose
 
-from definitions import CONFIG_PATH
 from models.model_factory import get_model
+
+
+config = configparser.ConfigParser()
+config.read('config.ini')
 
 
 class Binarizer:
@@ -22,20 +25,18 @@ class Binarizer:
         self._transform = Compose([transforms.ToTensor(),
                                    transforms.Normalize(mean=[0.732],
                                                         std=[0.129])])
-        
+
         if device:
             self._device = device
         else:
             self._device = torch.device('cpu')
 
-        self._model = model = get_model(kind=kind,
-                                        device=self._device,
-                                        cache=True)
+        self._model = get_model(kind=kind,
+                                device=self._device,
+                                cache=True)
         self._model.eval()
 
-        cfg = configparser.ConfigParser()
-        cfg.read(CONFIG_PATH)
-        self._radius = cfg['DATA INGESTION'].getint('radius')
+        self._radius = config['DATA INGESTION'].getint('radius')
 
     def binarize(self, img):
         """
@@ -65,8 +66,8 @@ class Binarizer:
         """
         """
         with torch.no_grad():
-            rows   = img.shape[2] - self._radius * 2          
-            cols   = img.shape[3] - self._radius * 2
+            rows = img.shape[2] - self._radius * 2
+            cols = img.shape[3] - self._radius * 2
             output = np.empty((rows, cols)).astype(np.uint8)
             for row in tqdm(range(rows)):
                 for col in range(cols):
