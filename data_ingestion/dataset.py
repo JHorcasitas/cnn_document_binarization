@@ -2,6 +2,7 @@ import os
 import configparser
 from collections import OrderedDict
 
+import torch
 import numpy as np
 from PIL import Image, ImageOps
 from torch.utils.data import Dataset
@@ -20,11 +21,12 @@ class BinaryDataset(Dataset):
         kind (str): one of: {train, test, val}
         input_transform (callable): transformation to apply to every image
     """
-    def __init__(self, kind, transform_input=False):
+    def __init__(self, kind, transform_input=True, transform_target=True):
         self._kind = kind
-        self._radius = config['data_ingestion']['radius']
+        self._radius = config['data_ingestion'].getint('radius')
         self._data_path = config['data_ingestion']['data_path']
         self._transform_input = transform_input
+        self._transform_target = transform_target
 
         input_path = os.path.join(self._data_path, 'input', self._kind)
         target_path = os.path.join(self._data_path, 'target', self._kind)
@@ -91,6 +93,9 @@ class BinaryDataset(Dataset):
         if self._transform_input:
             input = input_transform(input)
 
+        if self._transform_target:
+            target = torch.from_numpy(target)
+
         return input, target
 
 
@@ -110,7 +115,7 @@ class StridedDataset(Dataset):
         self._transform_input = transform_input
         self._transform_target = transform_target
 
-        self._radius = config['data_ingestion']['radius']
+        self._radius = config['data_ingestion'].getint('radius')
         self._data_path = config['data_ingestion']['data_path']
 
         self._input_path = os.path.join(self._data_path, 'input', self._kind)
