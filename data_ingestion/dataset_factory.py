@@ -1,30 +1,35 @@
+from typing import Union
 from .dataset import BinaryDataset
 from .dataset import StridedDataset
 
 
-def get_dataset(dataset,
-                kind,
-                transform_input=False,
-                transform_target=False):
-    """
-    Retrieves especified dataset
-    Args:
-        dataset (str): either ´binary´ or ´strided´
-        kind (str): one of {train, test, val}
-        transform_input (bool): wether to transform target so that it can be
-        processed by PyTorch
-        transform_target (bool): wether to transform target so that it can be
-        processed by PyTorch
-    """
-    if kind not in {'train', 'test', 'val'}:
-        raise ValueError(f'Kind value: \'{kind}\' not supported')
+Dataset = Union[BinaryDataset, StridedDataset]
 
-    if dataset == 'binary':
-        return BinaryDataset(kind=kind,
-                             transform_input=transform_input)
-    elif dataset == 'strided':
-        return StridedDataset(kind=kind,
-                              transform_input=transform_input,
-                              transform_target=transform_target)
+
+def get_dataset(dataset: str,
+                kind: str,
+                transform_input: bool = True,
+                transform_target: bool = True) -> Dataset:
+    """
+    Retrieves the especified dataset
+    Args:
+        dataset: either 'binary' or 'strided'
+        kind: one of {'train', 'test', 'val'}
+        transform_input: wether to transform target so that it can be processed
+        by PyTorch
+        transform_target: wether to transform target so that it can be
+        processed by PyTorch
+    """
+    if kind in {'train', 'val'}:
+        if dataset == 'binary':
+            return BinaryDataset(kind=kind,
+                                 transform_input=transform_input,
+                                 transform_target=transform_target)
+        elif dataset == 'strided':
+            return StridedDataset(kind=kind,
+                                  transform_input=transform_input,
+                                  transform_target=transform_target)
+        else:
+            raise ValueError(f'Unsupported dataset value: {dataset}')
     else:
-        raise ValueError(f'Dataset value: \'{dataset}\' not supported')
+        raise ValueError(f'Unsupported kind value: {kind}')
