@@ -4,7 +4,7 @@ from itertools import accumulate
 from typing import Optional, List
 
 import torch
-from torch.utils.data import random_split, DataLoader, Subset
+from torch.utils.data import DataLoader, Subset, WeightedRandomSampler
 
 
 MAX_DATASET_SIZE = 2 ** 24  # Introduced in Pytorch 1.3.0
@@ -13,6 +13,7 @@ Dataset = torch.utils.data.Dataset
 Sampler = torch.utils.data.Sampler
 
 
+# TODO: test data loader
 class BinaryDataLoader:
     """
     With the introduction of PyTorch 1.3.0 a RuntimeError is thrown when trying
@@ -24,9 +25,7 @@ class BinaryDataLoader:
                  dataset: Dataset,
                  batch_size: int = 256,
                  num_workers: int = 2,
-                 shuffle: bool = False,
                  weights: Optional[List[float]] = None) -> None:
-        self._shuffle = shuffle
         self._batch_size = batch_size
         self._num_workers = num_workers
         self._datasets = self._split_dataset(dataset)
@@ -47,6 +46,7 @@ class BinaryDataLoader:
 
     # TODO: Test this
     def _split_dataset(self, dataset: Dataset) -> List[Dataset]:
+        breakpoint()
         n_parts = ceil(len(dataset) / MAX_DATASET_SIZE)
         lengths = [floor(len(dataset) / n_parts) for _ in range(n_parts)]
         lengths[-1] += len(dataset) - sum(lengths)
@@ -66,13 +66,12 @@ class BinaryDataLoader:
             new_weights.append(weights[start: start + offset])
         return new_weights
 
-    # TODO: Change for new samplers
     def _construct_dataloaders(self):
         dataloaders = []
-        for dataset in self._datasets:
+        for dataset, weights in zip(self._datasets, self._weights):
+            sampler = WeightedRandomSampler(weights, len(weights))
             dataloaders.append(DataLoader(dataset=dataset,
-                                          sampler=self._sampler[:len(dataset)],
-                                          shuffle=self._shuffle,
+                                          sampler=sampler,
                                           num_workers=self._num_workers,
                                           batch_size=self._batch_size))
         return [iter(loader) for loader in dataloaders]
