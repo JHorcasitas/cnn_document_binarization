@@ -13,7 +13,6 @@ Dataset = torch.utils.data.Dataset
 Sampler = torch.utils.data.Sampler
 
 
-# TODO: test data loader
 class BinaryDataLoader:
     """
     With the introduction of PyTorch 1.3.0 a RuntimeError is thrown when trying
@@ -44,9 +43,7 @@ class BinaryDataLoader:
                 continue
         raise StopIteration
 
-    # TODO: Test this
     def _split_dataset(self, dataset: Dataset) -> List[Dataset]:
-        breakpoint()
         n_parts = ceil(len(dataset) / MAX_DATASET_SIZE)
         lengths = [floor(len(dataset) / n_parts) for _ in range(n_parts)]
         lengths[-1] += len(dataset) - sum(lengths)
