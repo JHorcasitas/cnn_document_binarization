@@ -1,21 +1,19 @@
-from typing import Optional
+from typing import List
 
 import torch
 from .datloader import BinaryDataLoader
 
 
 Dataset = torch.utils.data.Dataset
-Sampler = torch.utils.data.Sampler
 
 
+# TODO: add support for validation data loader
 def get_dataloader(dataset: Dataset,
+                   weights: List[float],
                    batch_size: int = 256,
-                   num_workers: int = 2,
-                   shuffle: bool = False,
-                   sampler: Optional[Sampler] = None) -> BinaryDataLoader:
+                   num_workers: int = 2) -> BinaryDataLoader:
     dataloader = BinaryDataLoader(dataset=dataset,
                                   batch_size=batch_size,
                                   num_workers=num_workers,
-                                  shuffle=shuffle,
-                                  sampler=sampler)
+                                  weights=weights)
     return dataloader
