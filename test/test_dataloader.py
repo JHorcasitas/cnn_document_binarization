@@ -1,6 +1,5 @@
 import unittest
 from random import random
-from functools import reduce
 
 from data_ingestion.dataset import BinaryDataset
 from data_ingestion.dataloader import BinaryDataLoader, MAX_DATASET_SIZE
@@ -9,8 +8,8 @@ from data_ingestion.dataloader import BinaryDataLoader, MAX_DATASET_SIZE
 class TestDataloader(unittest.TestCase):
 
     def setUp(self):
-        self.dataset = dataset = BinaryDataset(kind='train')
-        self.weights = [random() for _ in range(len(dataset))]
+        self.dataset = BinaryDataset(kind='train')
+        self.weights = [random() for _ in range(len(self.dataset))]
         self.loader = BinaryDataLoader(dataset=self.dataset,
                                        weights=self.weights)
 
@@ -31,11 +30,12 @@ class TestDataloader(unittest.TestCase):
 
         # Check that indices of all datasets are different
         indices = [d.indices for d in self.loader._datasets]
-        concat_indices = reduce(lambda acc, v: acc + v, indices, initial=[])
-        self.assertEqual(len(self.dataset), len(set(concat_indices)))
+        n = len(self.dataset) - 1
+        self.assertEqual(sum([sum(i) for i in indices]), ((n * (n + 1)) / 2))
 
-        # Check that no index is bigger than the original dataset length
-        self.assertTrue(max(concat_indices) == len(self.dataset))
+        # # Check that no index is bigger than the original dataset length
+        max_index = max([max(d.indices) for d in self.loader._datasets])
+        self.assertTrue(max_index == (len(self.dataset) - 1))
 
     def test_split_weights(self):
         pass
