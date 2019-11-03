@@ -54,7 +54,6 @@ class BinaryDataLoader:
             datasets.append(Subset(dataset, indices))
         return datasets
 
-    # TODO: Test this
     def _split_weights(self, weights):
         lengths = [len(dataset) for dataset in self._datasets]
         cum_lengths = [0] + list(accumulate(lengths))

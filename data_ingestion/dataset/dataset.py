@@ -7,7 +7,8 @@ import numpy as np
 from PIL import Image, ImageOps
 from torch.utils.data import Dataset
 
-from .data_transformations import input_transform, target_transform
+from data_ingestion.data_transformations import input_transform
+from data_ingestion.data_transformations import target_transform
 
 
 config = configparser.ConfigParser()
@@ -18,7 +19,7 @@ class BinaryDataset(Dataset):
     """
     Retrieve image patches
     args:
-        kind (str): one of: {train, test, val}
+        kind (str): one of: {train, val}
         input_transform (callable): transformation to apply to every image
     """
     def __init__(self, kind, transform_input=True, transform_target=True):

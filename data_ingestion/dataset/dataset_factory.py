@@ -1,6 +1,5 @@
 from typing import Union
-from .dataset import BinaryDataset
-from .dataset import StridedDataset
+from data_ingestion.dataset.dataset import BinaryDataset, StridedDataset
 
 
 Dataset = Union[BinaryDataset, StridedDataset]
