@@ -1,5 +1,6 @@
 import unittest
 from random import random
+from functools import reduce
 
 from data_ingestion.dataset import BinaryDataset
 from data_ingestion.dataloader import BinaryDataLoader, MAX_DATASET_SIZE
@@ -33,12 +34,14 @@ class TestDataloader(unittest.TestCase):
         n = len(self.dataset) - 1
         self.assertEqual(sum([sum(i) for i in indices]), ((n * (n + 1)) / 2))
 
-        # # Check that no index is bigger than the original dataset length
+        # Check that no index is bigger than the original dataset length
         max_index = max([max(d.indices) for d in self.loader._datasets])
         self.assertTrue(max_index == (len(self.dataset) - 1))
 
     def test_split_weights(self):
-        pass
-
-    def test_construct_dataloaders(self):
-        pass
+        # The concatenation of the splitted weights must be equal to the
+        # original weights
+        concat_weights = reduce(lambda acc, v: acc + v,
+                                self.loader._weights,
+                                [])
+        self.assertEqual(concat_weights, self.weights)
